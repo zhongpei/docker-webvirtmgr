@@ -1,13 +1,13 @@
 FROM ubuntu:14.04
 MAINTAINER Primiano Tucci <p.tucci@gmail.com>
-
+RUN sed -i "s/http:\/\/archive\.ubuntu\.com/http:\/\/mirrors.163.com/" /etc/apt/sources.list
 RUN apt-get -y update && \
     apt-get -y install git python-pip python-libvirt python-libxml2 supervisor novnc
 
 RUN git clone https://github.com/retspen/webvirtmgr /webvirtmgr
 WORKDIR /webvirtmgr
 RUN git checkout 7f140f99f4 #v4.8.8
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt -i http://pypi.douban.com/simple/
 ADD local_settings.py /webvirtmgr/webvirtmgr/local/local_settings.py
 RUN sed -i 's/0.0.0.0/172.17.42.1/g' vrtManager/create.py
 RUN /usr/bin/python /webvirtmgr/manage.py collectstatic --noinput
@@ -24,7 +24,7 @@ RUN apt-get -ys clean
 
 WORKDIR /
 VOLUME /data/vm
-
+EXPOSE 8000
 EXPOSE 8080
 EXPOSE 6080
 CMD ["supervisord", "-n"]
